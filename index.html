@@ -89,13 +89,12 @@
   }
   .item:active { transform:scale(.97); }
   .item.done { background:#f8fafc; }
-  .item .num {
-    width:34px; height:34px; border-radius:10px; flex-shrink:0;
+  .item .icon {
+    width:46px; height:46px; border-radius:14px; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
-    font-size:15px; font-weight:800; color:var(--primary-dark);
-    background:#fff2e8; transition:all .25s;
+    font-size:23px; background:#fff2e8; transition:all .25s;
   }
-  .item.done .num { background:#e8f9ef; color:#1fa35b; }
+  .item.done .icon { background:#e8f9ef; }
   .item .body { flex:1; min-width:0; }
   .item .txt { font-size:14.5px; font-weight:600; line-height:1.5; transition:color .25s; }
   .item.done .txt { color:var(--muted); text-decoration:line-through; font-weight:400; }
@@ -171,16 +170,16 @@ const GROUPS = [
   {
     name: "校园餐食堂专项检查",
     items: [
-      { id:'k28', num:28, text:'成立膳食经费、加工、遴选等监督机制，组织入校开展监督工作', sub:'建立监督机制' },
-      { id:'k29', num:29, text:'食堂信息对外公示（遴选公告、食品经营许可证、从业人员健康证、带量菜谱、联系电话等），及时处理问题、接受家长监督投诉；"十必须"张贴于办公区、"十不准"张贴于工作场所', sub:'信息公开 · 制度上墙' },
-      { id:'k30', num:30, text:'建立"双人或多人联检"查验制度，查验人员至少包含食品安全员和食堂管理人员，集体监督、详细记录（含照片/录像）、公开透明，凭证保存合规', sub:'联检查验制度' },
-      { id:'k31', num:31, text:'规范原料贮存：无食品与非食品混放；分类、分架、离墙、离地、有标识；冷冻(藏)设施正常运转并配备温度显示装置', sub:'原料贮存规范' },
-      { id:'k32', num:32, text:'明显标识、区分加工设施，防止食品交叉污染（水池、容器、工具区分标识、分开放置和使用）', sub:'交叉污染防控' },
-      { id:'k33', num:33, text:'严格管理食品添加剂：不采购、贮存、使用亚硝酸盐、染色剂等国家禁止品种', sub:'添加剂管理' },
-      { id:'k34', num:34, text:'定期开展病媒生物防制：冷冻(藏)、保温、陈列、采光、通风、洗手、消毒、三防等设施正常；无病媒迹象；有防制记录；餐厨废弃物存放清理合规', sub:'病媒生物防制' },
-      { id:'k35', num:35, text:'严格规范执行行政陪餐制度，并邀请家长代表入校陪餐', sub:'行政陪餐' },
-      { id:'k36', num:36, text:'餐饮具、烹饪器具清洗消毒达标，无交叉污染风险', sub:'餐具消毒' },
-      { id:'k37', num:37, text:'不挪用、不挤占学生伙食费，不违规使用营养膳食补助资金（不虚报就餐人数）', sub:'经费管理' },
+      { id:'k28', icon:'👥', text:'成立膳食经费、加工、遴选等监督机制，组织入校开展监督工作', sub:'建立监督机制' },
+      { id:'k29', icon:'📢', text:'食堂信息对外公示（遴选公告、食品经营许可证、从业人员健康证、带量菜谱、联系电话等），及时处理问题、接受家长监督投诉；"十必须"张贴于办公区、"十不准"张贴于工作场所', sub:'信息公开 · 制度上墙' },
+      { id:'k30', icon:'🤝', text:'建立"双人或多人联检"查验制度，查验人员至少包含食品安全员和食堂管理人员，集体监督、详细记录（含照片/录像）、公开透明，凭证保存合规', sub:'联检查验制度' },
+      { id:'k31', icon:'🧊', text:'规范原料贮存：无食品与非食品混放；分类、分架、离墙、离地、有标识；冷冻(藏)设施正常运转并配备温度显示装置', sub:'原料贮存规范' },
+      { id:'k32', icon:'🔪', text:'明显标识、区分加工设施，防止食品交叉污染（水池、容器、工具区分标识、分开放置和使用）', sub:'交叉污染防控' },
+      { id:'k33', icon:'🧪', text:'严格管理食品添加剂：不采购、贮存、使用亚硝酸盐、染色剂等国家禁止品种', sub:'添加剂管理' },
+      { id:'k34', icon:'🛡️', text:'定期开展病媒生物防制：冷冻(藏)、保温、陈列、采光、通风、洗手、消毒、三防等设施正常；无病媒迹象；有防制记录；餐厨废弃物存放清理合规', sub:'病媒生物防制' },
+      { id:'k35', icon:'🍚', text:'严格规范执行行政陪餐制度，并邀请家长代表入校陪餐', sub:'行政陪餐' },
+      { id:'k36', icon:'🥢', text:'餐饮具、烹饪器具清洗消毒达标，无交叉污染风险', sub:'餐具消毒' },
+      { id:'k37', icon:'💰', text:'不挪用、不挤占学生伙食费，不违规使用营养膳食补助资金（不虚报就餐人数）', sub:'经费管理' },
     ]
   }
 ];
@@ -221,7 +220,7 @@ function render(){
       const isDone = done.has(item.id);
       return `
         <div class="item ${isDone?'done':''}" onclick="toggle('${item.id}')">
-          <div class="num">${item.num}</div>
+          <div class="icon">${item.icon}</div>
           <div class="body">
             <div class="txt">${item.text}</div>
             <div class="sub">${item.sub}</div>
