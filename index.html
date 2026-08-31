@@ -117,13 +117,14 @@
   .btn-group { display:flex; gap:8px; flex-shrink:0; margin-top:2px; }
   .mark {
     width:34px; height:34px; border-radius:50%;
-    border:2.5px solid #d7dbe8; background:#fff;
+    border:2.5px solid #e2e5ec; background:#f1f3f7;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; transition:all .2s;
   }
-  .mark svg { width:16px; height:16px; stroke:#fff; stroke-width:3.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
-  .mark.ok { background:var(--success); border-color:var(--success); }
-  .mark.bad { background:var(--danger); border-color:var(--danger); }
+  .mark svg { width:16px; height:16px; stroke:#c3c9d6; stroke-width:3.5; fill:none; stroke-linecap:round; stroke-linejoin:round; transition:stroke .2s; }
+  .mark.ok.active { background:var(--success); border-color:var(--success); }
+  .mark.bad.active { background:var(--danger); border-color:var(--danger); }
+  .mark.active svg { stroke:#fff; }
   .mark.active { transform:scale(1.08); box-shadow:0 2px 8px rgba(0,0,0,.15); }
   .mark:active { transform:scale(.92); }
 
@@ -194,8 +195,7 @@ const GROUPS = [
   {
     name: "人员管理",
     items: [
-      { id:'p1', icon:'👕', text:'从业人员着装规范：穿戴工作服、戴帽、佩戴口罩', sub:'着装要求' },
-      { id:'p2', icon:'👟', text:'穿防滑橡胶鞋（三白：白帽、白衣、白裤/白围裙）', sub:'三白规范' },
+      { id:'p1', icon:'👕', text:'从业人员着装规范：穿戴工作服、戴帽、佩戴口罩，穿防滑橡胶鞋', sub:'着装要求' },
       { id:'p3', icon:'🪪', text:'从业人员持有效健康证，且证件公示上墙', sub:'健康证管理' },
       { id:'p4', icon:'🌡️', text:'晨检落实：无发热、咳嗽、手部外伤等健康异常人员上岗', sub:'晨检制度' },
       { id:'p5', icon:'🧼', text:'进入操作间前规范洗手、消毒，不留长指甲、不戴饰品', sub:'个人卫生' },
