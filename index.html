@@ -153,7 +153,6 @@
 </div>
 
 <div class="content">
-  <div class="section-title">校园餐食堂专项检查</div>
   <div id="list"></div>
 </div>
 
@@ -168,7 +167,7 @@
 // ===== 检查项（依据《厨房检查表》PDF 内容整理） =====
 const GROUPS = [
   {
-    name: "校园餐食堂专项检查",
+    name: "",
     items: [
       { id:'k28', icon:'👥', text:'成立膳食经费、加工、遴选等监督机制，组织入校开展监督工作', sub:'建立监督机制' },
       { id:'k29', icon:'📢', text:'食堂信息对外公示（遴选公告、食品经营许可证、从业人员健康证、带量菜谱、联系电话等），及时处理问题、接受家长监督投诉；"十必须"张贴于办公区、"十不准"张贴于工作场所', sub:'信息公开 · 制度上墙' },
@@ -228,7 +227,7 @@ function render(){
           <div class="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
         </div>`;
     }).join('');
-    return `<div class="section-title">${group.name}</div>${itemsHtml}`;
+    return itemsHtml;
   }).join('');
 
   document.getElementById('btnReset').disabled = (doneN===0);
