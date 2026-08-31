@@ -9,6 +9,7 @@
     --primary: #ff8c42;
     --primary-dark: #f06f1f;
     --success: #2ecc71;
+    --danger: #e74c3c;
     --bg: #f4f6fb;
     --card: #ffffff;
     --text: #2b2d42;
@@ -34,28 +35,32 @@
   .header .date { font-size:13px; opacity:.92; margin-top:4px; }
   .badge { background:rgba(255,255,255,.22); padding:5px 14px; border-radius:18px; font-size:12.5px; font-weight:600; flex-shrink:0; }
 
-  /* ===== 进度条（独立区域，不再覆盖标题） ===== */
+  /* ===== 统计卡 ===== */
+  .stats-row {
+    display:flex; gap:10px; margin-top:14px;
+  }
+  .stat-card {
+    flex:1; background:rgba(255,255,255,.18);
+    border-radius:14px; padding:10px 8px;
+    text-align:center;
+  }
+  .stat-card .num { font-size:22px; font-weight:800; line-height:1.2; }
+  .stat-card .label { font-size:11.5px; opacity:.92; margin-top:2px; }
+  .stat-card.ok .num { color:#b8f5d0; }
+  .stat-card.bad .num { color:#ffd1cb; }
+
+  /* ===== 进度条 ===== */
   .progress-bar-wrap {
-    margin-top:16px;
+    margin-top:12px;
     background:rgba(255,255,255,.18);
     border-radius:12px;
-    height:26px;
+    height:24px;
     position:relative;
     overflow:hidden;
+    display:flex;
   }
-  .progress-bar-fill {
-    height:100%;
-    width:0%;
-    background:#fff;
-    border-radius:12px;
-    transition:width .5s ease;
-    position:relative;
-  }
-  .progress-bar-fill::after {
-    content:'';
-    position:absolute; top:0; right:0; bottom:0; width:20px;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.35));
-  }
+  .progress-bar-ok { height:100%; background:#6ef0a3; border-radius:12px 0 0 12px; transition:width .5s ease; }
+  .progress-bar-bad { height:100%; background:#ff8d82; transition:width .5s ease; }
   .progress-text-row {
     display:flex; align-items:center; justify-content:space-between;
     margin-top:8px;
@@ -72,41 +77,55 @@
     background:#fff6e6; color:#c77b10; font-size:12px; font-weight:600;
     padding:4px 12px; border-radius:14px;
   }
+  .alert-tag {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#fdecea; color:#d63031; font-size:12px; font-weight:600;
+    padding:4px 12px; border-radius:14px;
+  }
 
   .content { padding:20px 18px 110px; }
   .section-title {
-    font-size:14px; color:var(--muted); font-weight:700;
+    font-size:14px; color:#7a8398; font-weight:800;
     display:flex; align-items:center; gap:8px; margin:22px 0 12px;
   }
   .section-title::before { content:''; width:4px; height:16px; background:var(--primary); border-radius:3px; }
 
   .item {
-    background:var(--card); border-radius:18px; padding:15px 16px;
-    margin-bottom:12px; display:flex; align-items:flex-start; gap:13px;
-    box-shadow:0 2px 10px rgba(43,45,66,.05); cursor:pointer;
-    transition:transform .15s, opacity .25s, background .25s;
-    user-select:none;
+    background:var(--card); border-radius:18px; padding:14px 14px;
+    margin-bottom:12px; display:flex; align-items:flex-start; gap:12px;
+    box-shadow:0 2px 10px rgba(43,45,66,.05);
+    transition:transform .15s, background .25s;
+    user-select:none; border:2px solid transparent;
   }
   .item:active { transform:scale(.97); }
-  .item.done { background:#f8fafc; }
+  .item.s-ok { background:#f0fdf4; border-color:#bfecc9; }
+  .item.s-bad { background:#fef5f4; border-color:#f6c6c1; }
   .item .icon {
     width:46px; height:46px; border-radius:14px; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
     font-size:23px; background:#fff2e8; transition:all .25s;
   }
-  .item.done .icon { background:#e8f9ef; }
+  .item.s-ok .icon { background:#d6f5e0; }
+  .item.s-bad .icon { background:#fde3e0; }
   .item .body { flex:1; min-width:0; }
   .item .txt { font-size:14.5px; font-weight:600; line-height:1.5; transition:color .25s; }
-  .item.done .txt { color:var(--muted); text-decoration:line-through; font-weight:400; }
+  .item.s-ok .txt { color:#1d7a44; }
+  .item.s-bad .txt { color:#c0392b; }
   .item .sub { font-size:12px; color:var(--muted); margin-top:3px; line-height:1.4; }
-  .check {
-    width:29px; height:29px; border-radius:50%; flex-shrink:0; margin-top:2px;
-    border:2.5px solid #d7dbe8; display:flex; align-items:center; justify-content:center;
-    transition:all .25s;
+
+  /* 打勾 / 打叉 双按钮 */
+  .btn-group { display:flex; gap:8px; flex-shrink:0; margin-top:2px; }
+  .mark {
+    width:34px; height:34px; border-radius:50%;
+    border:2.5px solid #d7dbe8; background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s;
   }
-  .check svg { width:14px; height:14px; stroke:#fff; stroke-width:3.5; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:0; transform:scale(0); transition:all .2s; }
-  .item.done .check { background:var(--success); border-color:var(--success); }
-  .item.done .check svg { opacity:1; transform:scale(1); }
+  .mark svg { width:16px; height:16px; stroke:#fff; stroke-width:3.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .mark.ok { background:var(--success); border-color:var(--success); }
+  .mark.bad { background:var(--danger); border-color:var(--danger); }
+  .mark.active { transform:scale(1.08); box-shadow:0 2px 8px rgba(0,0,0,.15); }
+  .mark:active { transform:scale(.92); }
 
   .bottom {
     position:fixed; left:0; right:0; bottom:0;
@@ -141,50 +160,97 @@
   </div>
   <div class="date" id="dateLine">每日例行检查</div>
 
-  <!-- 进度条区域（与标题分离） -->
+  <!-- 统计卡 -->
+  <div class="stats-row">
+    <div class="stat-card ok"><div class="num" id="statOk">0</div><div class="label">✅ 合格</div></div>
+    <div class="stat-card bad"><div class="num" id="statBad">0</div><div class="label">❌ 不合格</div></div>
+    <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">检查项</div></div>
+  </div>
+
+  <!-- 进度条 -->
   <div class="progress-bar-wrap">
-    <div class="progress-bar-fill" id="bar"></div>
+    <div class="progress-bar-ok" id="barOk" style="width:0%"></div>
+    <div class="progress-bar-bad" id="barBad" style="width:0%"></div>
   </div>
   <div class="progress-text-row">
-    <span class="left" id="progressLeft">已完成 0 / 0 项</span>
+    <span class="left" id="progressLeft">未检查 0 项</span>
     <span class="right" id="pct">0%</span>
   </div>
   <div id="tagWrap" style="margin-top:6px;"></div>
 </div>
 
-<div class="content">
-  <div id="list"></div>
-</div>
+<div class="content" id="content"></div>
 
 <div class="bottom">
-  <button class="btn all" onclick="toggleAll()">✅ 全部完成</button>
+  <button class="btn all" onclick="toggleAll()">✅ 全部合格</button>
   <button class="btn reset" id="btnReset" onclick="resetAll()">↺ 重置</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== 检查项（依据《厨房检查表》PDF 内容整理） =====
+// ===== 检查项：按类型归类（每项可打勾=合格 / 打叉=不合格） =====
 const GROUPS = [
   {
-    name: "",
+    name: "人员管理",
     items: [
-      { id:'k28', icon:'👥', text:'成立膳食经费、加工、遴选等监督机制，组织入校开展监督工作', sub:'建立监督机制' },
-      { id:'k29', icon:'📢', text:'食堂信息对外公示（遴选公告、食品经营许可证、从业人员健康证、带量菜谱、联系电话等），及时处理问题、接受家长监督投诉；"十必须"张贴于办公区、"十不准"张贴于工作场所', sub:'信息公开 · 制度上墙' },
-      { id:'k30', icon:'🤝', text:'建立"双人或多人联检"查验制度，查验人员至少包含食品安全员和食堂管理人员，集体监督、详细记录（含照片/录像）、公开透明，凭证保存合规', sub:'联检查验制度' },
-      { id:'k31', icon:'🧊', text:'规范原料贮存：无食品与非食品混放；分类、分架、离墙10cm、离地10cm、有标识；冷冻(藏)设施正常运转并配备温度显示装置', sub:'原料贮存规范' },
-      { id:'k32', icon:'🔪', text:'明显标识、区分加工设施，防止食品交叉污染（水池、容器、工具区分标识、分开放置和使用）', sub:'交叉污染防控' },
-      { id:'k33', icon:'🧪', text:'严格管理食品添加剂：不采购、贮存、使用亚硝酸盐、染色剂等国家禁止品种', sub:'添加剂管理' },
-      { id:'k34', icon:'🛡️', text:'定期开展病媒生物防制：冷冻(藏)、保温、陈列、采光、通风、洗手、消毒、三防等设施正常；无病媒迹象；有防制记录；餐厨废弃物存放清理合规', sub:'病媒生物防制' },
-      { id:'k35', icon:'🍚', text:'严格规范执行行政陪餐制度，并邀请家长代表入校陪餐', sub:'行政陪餐' },
-      { id:'k36', icon:'🥢', text:'餐饮具、烹饪器具清洗消毒达标，无交叉污染风险', sub:'餐具消毒' },
-      { id:'k37', icon:'💰', text:'不挪用、不挤占学生伙食费，不违规使用营养膳食补助资金（不虚报就餐人数）', sub:'经费管理' },
+      { id:'p1', icon:'👕', text:'从业人员着装规范：穿戴工作服、戴帽、佩戴口罩', sub:'着装要求' },
+      { id:'p2', icon:'👟', text:'穿防滑橡胶鞋（三白：白帽、白衣、白裤/白围裙）', sub:'三白规范' },
+      { id:'p3', icon:'🪪', text:'从业人员持有效健康证，且证件公示上墙', sub:'健康证管理' },
+      { id:'p4', icon:'🌡️', text:'晨检落实：无发热、咳嗽、手部外伤等健康异常人员上岗', sub:'晨检制度' },
+      { id:'p5', icon:'🧼', text:'进入操作间前规范洗手、消毒，不留长指甲、不戴饰品', sub:'个人卫生' },
+    ]
+  },
+  {
+    name: "原料管理",
+    items: [
+      { id:'r1', icon:'🥬', text:'食材新鲜，无变质、过期，进货查验、索证索票齐全', sub:'进货查验' },
+      { id:'r2', icon:'🧊', text:'原料贮存规范：分类、分架、离墙10cm、离地10cm、有标识', sub:'贮存规范' },
+      { id:'r3', icon:'🧪', text:'严格管理食品添加剂：不采购、贮存、使用违禁品种', sub:'添加剂管理' },
+      { id:'r4', icon:'🏷️', text:'食品与非食品分区分开存放，无混放情形', sub:'分区存放' },
+    ]
+  },
+  {
+    name: "加工操作",
+    items: [
+      { id:'c1', icon:'🔪', text:'生熟分开：案板、刀具、水池、容器区分标识，分开放置和使用', sub:'生熟分离' },
+      { id:'c2', icon:'🍲', text:'加工过程烧熟煮透，食品中心温度达标', sub:'烧熟煮透' },
+      { id:'c3', icon:'⏰', text:'制作完成至食用时间不超过2小时', sub:'时间控制' },
+      { id:'c4', icon:'🧤', text:'接触直接入口食品时佩戴一次性手套', sub:'手套使用' },
+    ]
+  },
+  {
+    name: "设施设备",
+    items: [
+      { id:'e1', icon:'🌡️', text:'冷冻(藏)设施正常运转，配备温度显示装置，温度达标', sub:'冷藏冷冻' },
+      { id:'e2', icon:'🥢', text:'餐饮具、烹饪器具清洗消毒达标（消毒柜正常运转）', sub:'餐具消毒' },
+      { id:'e3', icon:'🛡️', text:'三防设施（防蝇防鼠防尘）完好可用', sub:'三防设施' },
+      { id:'e4', icon:'💡', text:'采光、通风、洗手、消毒等设施设备能正常使用', sub:'基础设施' },
+    ]
+  },
+  {
+    name: "环境与卫生",
+    items: [
+      { id:'h1', icon:'🧹', text:'食堂内外环境整洁，地面、台面、案板干净无积水油污', sub:'清洁卫生' },
+      { id:'h2', icon:'🪟', text:'通风良好，防蝇防鼠防虫设施完好', sub:'防虫防鼠' },
+      { id:'h3', icon:'🗑️', text:'餐厨废弃物存放及清理符合要求，垃圾桶加盖', sub:'垃圾处理' },
+      { id:'h4', icon:'🧾', text:'定期病媒生物防制，有防制记录', sub:'病媒防制' },
+    ]
+  },
+  {
+    name: "制度落实",
+    items: [
+      { id:'s1', icon:'📢', text:'食堂信息对外公示（许可证、健康证、带量菜谱等），"十必须/十不准"上墙', sub:'信息公开' },
+      { id:'s2', icon:'🤝', text:'建立"双人或多人联检"查验制度，联检记录完整（含照片/录像）', sub:'联检查验' },
+      { id:'s3', icon:'🍚', text:'严格执行行政陪餐制度，邀请家长代表入校陪餐', sub:'行政陪餐' },
+      { id:'s4', icon:'💰', text:'不挪用、不挤占学生伙食费，不违规使用营养膳食补助资金', sub:'经费管理' },
     ]
   }
 ];
 
-const STORE_KEY = 'campus_meal_checklist_v1';
-let done = new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]'));
+const STORE_KEY = 'campus_meal_checklist_v2';
+// 状态: 0=未检查, 1=合格(打勾), 2=不合格(打叉)
+let state = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
 let allItems = GROUPS.flatMap(g=>g.items);
 
 function todayStr(){
@@ -196,58 +262,77 @@ document.getElementById('dateBadge').textContent = todayStr();
 document.getElementById('dateLine').textContent = '📍 每日例行检查 · ' + todayStr();
 
 function render(){
-  const list = document.getElementById('list');
+  const content = document.getElementById('content');
   const total = allItems.length;
-  const doneN = done.size;
-  const pct = total===0 ? 0 : Math.round(doneN/total*100);
+  let okN = 0, badN = 0;
+  allItems.forEach(i=>{ if(state[i.id]===1) okN++; else if(state[i.id]===2) badN++; });
+  const checkedN = okN + badN;
+  const pct = total===0 ? 0 : Math.round(checkedN/total*100);
 
-  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('statOk').textContent = okN;
+  document.getElementById('statBad').textContent = badN;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('barOk').style.width = (okN/total*100) + '%';
+  document.getElementById('barBad').style.width = (badN/total*100) + '%';
   document.getElementById('pct').textContent = pct + '%';
-  document.getElementById('progressLeft').textContent = `已完成 ${doneN} / ${total} 项`;
+  document.getElementById('progressLeft').textContent = checkedN===0 ? `未检查 ${total} 项` : `已检查 ${checkedN} / ${total} 项`;
 
   const tagWrap = document.getElementById('tagWrap');
-  if(doneN === total){
-    tagWrap.innerHTML = '<span class="done-tag">🎉 全部完成！</span>';
-  } else if(doneN > 0){
+  if(badN > 0){
+    tagWrap.innerHTML = `<span class="alert-tag">⚠️ ${badN} 项不合格，需整改</span>`;
+  } else if(checkedN === total){
+    tagWrap.innerHTML = '<span class="done-tag">🎉 全部合格！</span>';
+  } else if(checkedN > 0){
     tagWrap.innerHTML = '<span class="half-tag">⏳ 进行中</span>';
   } else {
     tagWrap.innerHTML = '';
   }
 
-  list.innerHTML = GROUPS.map(group=>{
+  content.innerHTML = GROUPS.map(group=>{
     const itemsHtml = group.items.map(item=>{
-      const isDone = done.has(item.id);
+      const st = state[item.id] || 0;
+      const cls = st===1 ? 's-ok' : (st===2 ? 's-bad' : '');
       return `
-        <div class="item ${isDone?'done':''}" onclick="toggle('${item.id}')">
+        <div class="item ${cls}">
           <div class="icon">${item.icon}</div>
           <div class="body">
             <div class="txt">${item.text}</div>
             <div class="sub">${item.sub}</div>
           </div>
-          <div class="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
+          <div class="btn-group">
+            <div class="mark ok ${st===1?'active':''}" onclick="mark('${item.id}',1)">
+              <svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg>
+            </div>
+            <div class="mark bad ${st===2?'active':''}" onclick="mark('${item.id}',2)">
+              <svg viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+            </div>
+          </div>
         </div>`;
     }).join('');
-    return itemsHtml;
+    return `<div class="section-title">${group.name}</div>${itemsHtml}`;
   }).join('');
 
-  document.getElementById('btnReset').disabled = (doneN===0);
+  document.getElementById('btnReset').disabled = (checkedN===0);
 }
 
-function save(){ localStorage.setItem(STORE_KEY, JSON.stringify([...done])); }
-function toggle(id){
-  if(done.has(id)) done.delete(id); else done.add(id);
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+function mark(id, val){
+  // 点相同的取消，点不同或未点则设置
+  if(state[id]===val) delete state[id];
+  else state[id] = val;
   save(); render();
-  if(done.size===allItems.length) celebrate();
+  const badN = allItems.filter(i=>state[i.id]===2).length;
+  if(badN===0 && Object.keys(state).length===allItems.length) celebrate();
 }
+
 function toggleAll(){
-  const all = done.size===allItems.length;
-  done.clear();
-  if(!all) allItems.forEach(i=>done.add(i.id));
-  save(); render();
-  if(!all) celebrate();
+  allItems.forEach(i=>state[i.id]=1);
+  save(); render(); celebrate();
 }
 function resetAll(){
-  done.clear(); save(); render(); showToast('已重置，重新开始检查');
+  state = {};
+  save(); render(); showToast('已重置，重新开始检查');
 }
 function showToast(msg){
   const t = document.getElementById('toast');
@@ -256,7 +341,7 @@ function showToast(msg){
   t._timer = setTimeout(()=>t.classList.remove('show'), 1800);
 }
 function celebrate(){
-  showToast('🎉 太棒了，全部检查完成！');
+  showToast('🎉 太棒了，全部检查合格！');
   const box = document.createElement('div');
   box.className = 'confetti';
   const colors = ['#ff8c42','#2ecc71','#4a90e2','#ffd93d','#ff6b6b'];
