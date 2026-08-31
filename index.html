@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>厨房检查表</title>
+<style>
+  :root {
+    --primary: #ff8c42;
+    --primary-dark: #f06f1f;
+    --success: #2ecc71;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #2b2d42;
+    --muted: #9aa0b4;
+    --warn: #ffb03a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+
+  .header {
+    background:linear-gradient(135deg,#ff8c42,#ff6b35);
+    color:#fff; padding:26px 20px 48px;
+    border-radius:0 0 28px 28px; position:relative;
+    box-shadow:0 6px 20px rgba(255,107,53,.25);
+  }
+  .header .row { display:flex; align-items:center; justify-content:space-between; }
+  .header h1 { font-size:21px; font-weight:800; }
+  .header .date { font-size:13px; opacity:.92; margin-top:4px; }
+  .badge { background:rgba(255,255,255,.22); padding:5px 14px; border-radius:18px; font-size:12.5px; font-weight:600; }
+
+  .progress-card {
+    position:absolute; left:20px; right:20px; bottom:-32px;
+    background:#fff; border-radius:20px; padding:16px 18px;
+    display:flex; align-items:center; gap:16px;
+    box-shadow:0 10px 30px rgba(43,45,66,.12);
+  }
+  .ring { position:relative; width:78px; height:78px; flex-shrink:0; }
+  .ring svg { width:78px; height:78px; transform:rotate(-90deg); }
+  .ring .track { stroke:#eef1f7; stroke-width:10; fill:none; }
+  .ring .bar { stroke:var(--success); stroke-width:10; fill:none; stroke-linecap:round; transition:stroke-dashoffset .5s ease; }
+  .ring .num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; color:var(--primary-dark); }
+  .pinfo { flex:1; }
+  .pinfo .big { font-size:27px; font-weight:800; color:var(--primary-dark); line-height:1.1; }
+  .pinfo .small { font-size:13px; color:var(--muted); margin-top:3px; }
+  .pinfo .done-tag {
+    display:inline-flex; align-items:center; gap:4px; margin-top:7px;
+    background:#e8f9ef; color:#1fa35b; font-size:12px; font-weight:600;
+    padding:4px 12px; border-radius:14px;
+  }
+  .pinfo .half-tag {
+    display:inline-flex; align-items:center; gap:4px; margin-top:7px;
+    background:#fff6e6; color:#c77b10; font-size:12px; font-weight:600;
+    padding:4px 12px; border-radius:14px;
+  }
+
+  .content { padding:58px 18px 110px; }
+  .section-title {
+    font-size:14px; color:var(--muted); font-weight:700;
+    display:flex; align-items:center; gap:8px; margin:22px 0 12px;
+  }
+  .section-title::before { content:''; width:4px; height:16px; background:var(--primary); border-radius:3px; }
+
+  .item {
+    background:var(--card); border-radius:18px; padding:15px 16px;
+    margin-bottom:12px; display:flex; align-items:center; gap:13px;
+    box-shadow:0 2px 10px rgba(43,45,66,.05); cursor:pointer;
+    transition:transform .15s, opacity .25s, background .25s;
+    user-select:none;
+  }
+  .item:active { transform:scale(.97); }
+  .item.done { background:#f8fafc; }
+  .item .icon {
+    width:46px; height:46px; border-radius:14px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:23px;
+    background:#fff2e8; transition:all .25s;
+  }
+  .item.done .icon { background:#e8f9ef; }
+  .item .body { flex:1; min-width:0; }
+  .item .txt { font-size:15.5px; font-weight:600; line-height:1.45; transition:color .25s; }
+  .item.done .txt { color:var(--muted); text-decoration:line-through; font-weight:400; }
+  .item .sub { font-size:12px; color:var(--muted); margin-top:3px; }
+  .check {
+    width:29px; height:29px; border-radius:50%; flex-shrink:0;
+    border:2.5px solid #d7dbe8; display:flex; align-items:center; justify-content:center;
+    transition:all .25s;
+  }
+  .check svg { width:14px; height:14px; stroke:#fff; stroke-width:3.5; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:0; transform:scale(0); transition:all .2s; }
+  .item.done .check { background:var(--success); border-color:var(--success); }
+  .item.done .check svg { opacity:1; transform:scale(1); }
+
+  .bottom {
+    position:fixed; left:0; right:0; bottom:0;
+    padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+    background:#fff; border-top:1px solid #eef1f7;
+    display:flex; gap:12px; box-shadow:0 -4px 20px rgba(43,45,66,.06);
+  }
+  .btn { flex:1; border:none; border-radius:14px; padding:15px; font-size:15px; font-weight:700; cursor:pointer; transition:all .2s; }
+  .btn:active { transform:scale(.97); }
+  .btn.all { background:linear-gradient(135deg,#2ecc71,#27ae60); color:#fff; }
+  .btn.reset { background:#f1f3f9; color:#8a91a8; }
+  .btn.reset:disabled { opacity:.5; }
+
+  .toast {
+    position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(20px);
+    background:rgba(43,45,66,.92); color:#fff; padding:10px 20px; border-radius:24px;
+    font-size:14px; opacity:0; pointer-events:none; transition:all .3s; z-index:99;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .confetti { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:100; overflow:hidden; }
+  .confetti span { position:absolute; top:-12px; border-radius:3px; animation:fall linear forwards; }
+  @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="row">
+    <h1>🍳 厨房检查表</h1>
+    <span class="badge" id="dateBadge">今天</span>
+  </div>
+  <div class="date" id="dateLine">每日例行检查</div>
+  <div class="progress-card">
+    <div class="ring">
+      <svg viewBox="0 0 78 78">
+        <circle class="track" cx="39" cy="39" r="32"></circle>
+        <circle class="bar" id="bar" cx="39" cy="39" r="32"></circle>
+      </svg>
+      <div class="num" id="pct">0%</div>
+    </div>
+    <div class="pinfo">
+      <div class="big" id="doneCount">0 / 0</div>
+      <div class="small">今日检查进度</div>
+      <div id="tagWrap"></div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="section-title">安全与消防</div>
+  <div id="list"></div>
+</div>
+
+<div class="bottom">
+  <button class="btn all" onclick="toggleAll()">✅ 全部完成</button>
+  <button class="btn reset" id="btnReset" onclick="resetAll()">↺ 重置</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 检查项配置（可直接增删修改） =====
+const GROUPS = [
+  {
+    name: "安全与消防",
+    items: [
+      { id:'k1', icon:'🧯', text:'灭火器完好、压力正常、在有效期内', sub:'消防安全' },
+      { id:'k2', icon:'🔥', text:'燃气阀门无泄漏，使用后已关闭', sub:'燃气安全' },
+      { id:'k3', icon:'🔌', text:'电器设备（蒸箱/灶台/油烟机）正常', sub:'用电安全' },
+      { id:'k4', icon:'🚪', text:'安全通道畅通，无杂物堆放', sub:'通道畅通' },
+    ]
+  },
+  {
+    name: "食品卫生",
+    items: [
+      { id:'k5', icon:'🥬', text:'食材新鲜，无变质、过期', sub:'食材管理' },
+      { id:'k6', icon:'🧊', text:'冰箱/冰柜温度：冷藏 0-8℃、冷冻 -18℃ 以下', sub:'温度控制' },
+      { id:'k7', icon:'🍽️', text:'生熟分开，案板/刀具分区使用', sub:'生熟分离' },
+      { id:'k8', icon:'🥢', text:'餐具清洗消毒到位（消毒柜正常运转）', sub:'消毒管理' },
+      { id:'k9', icon:'🧪', text:'食品留样记录：每样≥125g，保存48小时', sub:'留样记录' },
+    ]
+  },
+  {
+    name: "环境卫生",
+    items: [
+      { id:'k10', icon:'👕', text:'工作人员穿戴工作服、帽、口罩', sub:'个人卫生' },
+      { id:'k11', icon:'🧹', text:'地面、台面、水池干净无积水', sub:'清洁卫生' },
+      { id:'k12', icon:'🗑️', text:'垃圾桶及时清理、加盖密闭', sub:'垃圾处理' },
+      { id:'k13', icon:'🪟', text:'窗户通风良好，防蝇防鼠设施完好', sub:'防虫防鼠' },
+    ]
+  },
+  {
+    name: "台账记录",
+    items: [
+      { id:'k14', icon:'📋', text:'食品进货查验、索证索票齐全', sub:'进货台账' },
+      { id:'k15', icon:'✍️', text:'每日消毒记录、晨检记录填写完整', sub:'记录填写' },
+    ]
+  }
+];
+
+const STORE_KEY = 'kitchen_checklist_v1';
+let done = new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]'));
+let allItems = GROUPS.flatMap(g=>g.items);
+
+function todayStr(){
+  const d = new Date();
+  const week = ['日','一','二','三','四','五','六'][d.getDay()];
+  return `${d.getMonth()+1}月${d.getDate()}日 周${week}`;
+}
+document.getElementById('dateBadge').textContent = todayStr();
+document.getElementById('dateLine').textContent = '📍 每日例行检查 · ' + todayStr();
+
+function render(){
+  const list = document.getElementById('list');
+  const ring = document.getElementById('bar');
+  const total = allItems.length;
+  const doneN = done.size;
+  const C = 2 * Math.PI * 32;
+  ring.style.strokeDasharray = C;
+  ring.style.strokeDashoffset = C * (1 - doneN/total);
+  document.getElementById('pct').textContent = Math.round(doneN/total*100) + '%';
+  document.getElementById('doneCount').textContent = doneN + ' / ' + total;
+
+  const tagWrap = document.getElementById('tagWrap');
+  if(doneN === total){
+    tagWrap.innerHTML = '<span class="done-tag">🎉 全部完成！</span>';
+  } else if(doneN > 0){
+    tagWrap.innerHTML = '<span class="half-tag">⏳ 进行中</span>';
+  } else {
+    tagWrap.innerHTML = '';
+  }
+
+  list.innerHTML = GROUPS.map(group=>{
+    const itemsHtml = group.items.map(item=>{
+      const isDone = done.has(item.id);
+      return `
+        <div class="item ${isDone?'done':''}" onclick="toggle('${item.id}')">
+          <div class="icon">${item.icon}</div>
+          <div class="body">
+            <div class="txt">${item.text}</div>
+            <div class="sub">${item.sub}</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
+        </div>`;
+    }).join('');
+    return `<div class="section-title">${group.name}</div>${itemsHtml}`;
+  }).join('');
+
+  document.getElementById('btnReset').disabled = (doneN===0);
+}
+
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify([...done])); }
+function toggle(id){
+  if(done.has(id)) done.delete(id); else done.add(id);
+  save(); render();
+  if(done.size===allItems.length) celebrate();
+}
+function toggleAll(){
+  const all = done.size===allItems.length;
+  done.clear();
+  if(!all) allItems.forEach(i=>done.add(i.id));
+  save(); render();
+  if(!all) celebrate();
+}
+function resetAll(){
+  done.clear(); save(); render(); showToast('已重置，重新开始检查');
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+function celebrate(){
+  showToast('🎉 太棒了，全部检查完成！');
+  const box = document.createElement('div');
+  box.className = 'confetti';
+  const colors = ['#ff8c42','#2ecc71','#4a90e2','#ffd93d','#ff6b6b'];
+  for(let i=0;i<60;i++){
+    const s = document.createElement('span');
+    const size = 6+Math.random()*8;
+    s.style.cssText = `left:${Math.random()*100}%;width:${size}px;height:${size}px;background:${colors[i%colors.length]};animation-duration:${1.2+Math.random()*1.5}s;animation-delay:${Math.random()*0.4}s;`;
+    box.appendChild(s);
+  }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 3200);
+}
+render();
+</script>
+</body>
+</html>
