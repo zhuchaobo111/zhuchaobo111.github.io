@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>厨房检查表</title>
+<title>校园餐食堂检查表</title>
 <style>
   :root {
     --primary: #ff8c42;
@@ -13,7 +13,6 @@
     --card: #ffffff;
     --text: #2b2d42;
     --muted: #9aa0b4;
-    --warn: #ffb03a;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { height:100%; }
@@ -22,43 +21,59 @@
     background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
   }
 
+  /* ===== Header ===== */
   .header {
     background:linear-gradient(135deg,#ff8c42,#ff6b35);
-    color:#fff; padding:26px 20px 48px;
-    border-radius:0 0 28px 28px; position:relative;
+    color:#fff;
+    padding:22px 20px 18px;
+    border-radius:0 0 24px 24px;
     box-shadow:0 6px 20px rgba(255,107,53,.25);
   }
   .header .row { display:flex; align-items:center; justify-content:space-between; }
-  .header h1 { font-size:21px; font-weight:800; }
+  .header h1 { font-size:21px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .header .date { font-size:13px; opacity:.92; margin-top:4px; }
-  .badge { background:rgba(255,255,255,.22); padding:5px 14px; border-radius:18px; font-size:12.5px; font-weight:600; }
+  .badge { background:rgba(255,255,255,.22); padding:5px 14px; border-radius:18px; font-size:12.5px; font-weight:600; flex-shrink:0; }
 
-  .progress-card {
-    position:absolute; left:20px; right:20px; bottom:-32px;
-    background:#fff; border-radius:20px; padding:16px 18px;
-    display:flex; align-items:center; gap:16px;
-    box-shadow:0 10px 30px rgba(43,45,66,.12);
+  /* ===== 进度条（独立区域，不再覆盖标题） ===== */
+  .progress-bar-wrap {
+    margin-top:16px;
+    background:rgba(255,255,255,.18);
+    border-radius:12px;
+    height:26px;
+    position:relative;
+    overflow:hidden;
   }
-  .ring { position:relative; width:78px; height:78px; flex-shrink:0; }
-  .ring svg { width:78px; height:78px; transform:rotate(-90deg); }
-  .ring .track { stroke:#eef1f7; stroke-width:10; fill:none; }
-  .ring .bar { stroke:var(--success); stroke-width:10; fill:none; stroke-linecap:round; transition:stroke-dashoffset .5s ease; }
-  .ring .num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; color:var(--primary-dark); }
-  .pinfo { flex:1; }
-  .pinfo .big { font-size:27px; font-weight:800; color:var(--primary-dark); line-height:1.1; }
-  .pinfo .small { font-size:13px; color:var(--muted); margin-top:3px; }
-  .pinfo .done-tag {
-    display:inline-flex; align-items:center; gap:4px; margin-top:7px;
+  .progress-bar-fill {
+    height:100%;
+    width:0%;
+    background:#fff;
+    border-radius:12px;
+    transition:width .5s ease;
+    position:relative;
+  }
+  .progress-bar-fill::after {
+    content:'';
+    position:absolute; top:0; right:0; bottom:0; width:20px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.35));
+  }
+  .progress-text-row {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:8px;
+  }
+  .progress-text-row .left { font-size:13px; font-weight:600; opacity:.95; }
+  .progress-text-row .right { font-size:14px; font-weight:800; }
+  .done-tag {
+    display:inline-flex; align-items:center; gap:4px;
     background:#e8f9ef; color:#1fa35b; font-size:12px; font-weight:600;
     padding:4px 12px; border-radius:14px;
   }
-  .pinfo .half-tag {
-    display:inline-flex; align-items:center; gap:4px; margin-top:7px;
+  .half-tag {
+    display:inline-flex; align-items:center; gap:4px;
     background:#fff6e6; color:#c77b10; font-size:12px; font-weight:600;
     padding:4px 12px; border-radius:14px;
   }
 
-  .content { padding:58px 18px 110px; }
+  .content { padding:20px 18px 110px; }
   .section-title {
     font-size:14px; color:var(--muted); font-weight:700;
     display:flex; align-items:center; gap:8px; margin:22px 0 12px;
@@ -67,25 +82,26 @@
 
   .item {
     background:var(--card); border-radius:18px; padding:15px 16px;
-    margin-bottom:12px; display:flex; align-items:center; gap:13px;
+    margin-bottom:12px; display:flex; align-items:flex-start; gap:13px;
     box-shadow:0 2px 10px rgba(43,45,66,.05); cursor:pointer;
     transition:transform .15s, opacity .25s, background .25s;
     user-select:none;
   }
   .item:active { transform:scale(.97); }
   .item.done { background:#f8fafc; }
-  .item .icon {
-    width:46px; height:46px; border-radius:14px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; font-size:23px;
+  .item .num {
+    width:34px; height:34px; border-radius:10px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:800; color:var(--primary-dark);
     background:#fff2e8; transition:all .25s;
   }
-  .item.done .icon { background:#e8f9ef; }
+  .item.done .num { background:#e8f9ef; color:#1fa35b; }
   .item .body { flex:1; min-width:0; }
-  .item .txt { font-size:15.5px; font-weight:600; line-height:1.45; transition:color .25s; }
+  .item .txt { font-size:14.5px; font-weight:600; line-height:1.5; transition:color .25s; }
   .item.done .txt { color:var(--muted); text-decoration:line-through; font-weight:400; }
-  .item .sub { font-size:12px; color:var(--muted); margin-top:3px; }
+  .item .sub { font-size:12px; color:var(--muted); margin-top:3px; line-height:1.4; }
   .check {
-    width:29px; height:29px; border-radius:50%; flex-shrink:0;
+    width:29px; height:29px; border-radius:50%; flex-shrink:0; margin-top:2px;
     border:2.5px solid #d7dbe8; display:flex; align-items:center; justify-content:center;
     transition:all .25s;
   }
@@ -121,28 +137,24 @@
 
 <div class="header">
   <div class="row">
-    <h1>🍳 厨房检查表</h1>
+    <h1>🍽️ 校园餐食堂检查表</h1>
     <span class="badge" id="dateBadge">今天</span>
   </div>
   <div class="date" id="dateLine">每日例行检查</div>
-  <div class="progress-card">
-    <div class="ring">
-      <svg viewBox="0 0 78 78">
-        <circle class="track" cx="39" cy="39" r="32"></circle>
-        <circle class="bar" id="bar" cx="39" cy="39" r="32"></circle>
-      </svg>
-      <div class="num" id="pct">0%</div>
-    </div>
-    <div class="pinfo">
-      <div class="big" id="doneCount">0 / 0</div>
-      <div class="small">今日检查进度</div>
-      <div id="tagWrap"></div>
-    </div>
+
+  <!-- 进度条区域（与标题分离） -->
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="bar"></div>
   </div>
+  <div class="progress-text-row">
+    <span class="left" id="progressLeft">已完成 0 / 0 项</span>
+    <span class="right" id="pct">0%</span>
+  </div>
+  <div id="tagWrap" style="margin-top:6px;"></div>
 </div>
 
 <div class="content">
-  <div class="section-title">安全与消防</div>
+  <div class="section-title">校园餐食堂专项检查</div>
   <div id="list"></div>
 </div>
 
@@ -154,46 +166,26 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== 检查项配置（可直接增删修改） =====
+// ===== 检查项（依据《厨房检查表》PDF 内容整理） =====
 const GROUPS = [
   {
-    name: "安全与消防",
+    name: "校园餐食堂专项检查",
     items: [
-      { id:'k1', icon:'🧯', text:'灭火器完好、压力正常、在有效期内', sub:'消防安全' },
-      { id:'k2', icon:'🔥', text:'燃气阀门无泄漏，使用后已关闭', sub:'燃气安全' },
-      { id:'k3', icon:'🔌', text:'电器设备（蒸箱/灶台/油烟机）正常', sub:'用电安全' },
-      { id:'k4', icon:'🚪', text:'安全通道畅通，无杂物堆放', sub:'通道畅通' },
-    ]
-  },
-  {
-    name: "食品卫生",
-    items: [
-      { id:'k5', icon:'🥬', text:'食材新鲜，无变质、过期', sub:'食材管理' },
-      { id:'k6', icon:'🧊', text:'冰箱/冰柜温度：冷藏 0-8℃、冷冻 -18℃ 以下', sub:'温度控制' },
-      { id:'k7', icon:'🍽️', text:'生熟分开，案板/刀具分区使用', sub:'生熟分离' },
-      { id:'k8', icon:'🥢', text:'餐具清洗消毒到位（消毒柜正常运转）', sub:'消毒管理' },
-      { id:'k9', icon:'🧪', text:'食品留样记录：每样≥125g，保存48小时', sub:'留样记录' },
-    ]
-  },
-  {
-    name: "环境卫生",
-    items: [
-      { id:'k10', icon:'👕', text:'工作人员穿戴工作服、帽、口罩', sub:'个人卫生' },
-      { id:'k11', icon:'🧹', text:'地面、台面、水池干净无积水', sub:'清洁卫生' },
-      { id:'k12', icon:'🗑️', text:'垃圾桶及时清理、加盖密闭', sub:'垃圾处理' },
-      { id:'k13', icon:'🪟', text:'窗户通风良好，防蝇防鼠设施完好', sub:'防虫防鼠' },
-    ]
-  },
-  {
-    name: "台账记录",
-    items: [
-      { id:'k14', icon:'📋', text:'食品进货查验、索证索票齐全', sub:'进货台账' },
-      { id:'k15', icon:'✍️', text:'每日消毒记录、晨检记录填写完整', sub:'记录填写' },
+      { id:'k28', num:28, text:'成立膳食经费、加工、遴选等监督机制，组织入校开展监督工作', sub:'建立监督机制' },
+      { id:'k29', num:29, text:'食堂信息对外公示（遴选公告、食品经营许可证、从业人员健康证、带量菜谱、联系电话等），及时处理问题、接受家长监督投诉；"十必须"张贴于办公区、"十不准"张贴于工作场所', sub:'信息公开 · 制度上墙' },
+      { id:'k30', num:30, text:'建立"双人或多人联检"查验制度，查验人员至少包含食品安全员和食堂管理人员，集体监督、详细记录（含照片/录像）、公开透明，凭证保存合规', sub:'联检查验制度' },
+      { id:'k31', num:31, text:'规范原料贮存：无食品与非食品混放；分类、分架、离墙、离地、有标识；冷冻(藏)设施正常运转并配备温度显示装置', sub:'原料贮存规范' },
+      { id:'k32', num:32, text:'明显标识、区分加工设施，防止食品交叉污染（水池、容器、工具区分标识、分开放置和使用）', sub:'交叉污染防控' },
+      { id:'k33', num:33, text:'严格管理食品添加剂：不采购、贮存、使用亚硝酸盐、染色剂等国家禁止品种', sub:'添加剂管理' },
+      { id:'k34', num:34, text:'定期开展病媒生物防制：冷冻(藏)、保温、陈列、采光、通风、洗手、消毒、三防等设施正常；无病媒迹象；有防制记录；餐厨废弃物存放清理合规', sub:'病媒生物防制' },
+      { id:'k35', num:35, text:'严格规范执行行政陪餐制度，并邀请家长代表入校陪餐', sub:'行政陪餐' },
+      { id:'k36', num:36, text:'餐饮具、烹饪器具清洗消毒达标，无交叉污染风险', sub:'餐具消毒' },
+      { id:'k37', num:37, text:'不挪用、不挤占学生伙食费，不违规使用营养膳食补助资金（不虚报就餐人数）', sub:'经费管理' },
     ]
   }
 ];
 
-const STORE_KEY = 'kitchen_checklist_v1';
+const STORE_KEY = 'campus_meal_checklist_v1';
 let done = new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]'));
 let allItems = GROUPS.flatMap(g=>g.items);
 
@@ -207,14 +199,13 @@ document.getElementById('dateLine').textContent = '📍 每日例行检查 · ' 
 
 function render(){
   const list = document.getElementById('list');
-  const ring = document.getElementById('bar');
   const total = allItems.length;
   const doneN = done.size;
-  const C = 2 * Math.PI * 32;
-  ring.style.strokeDasharray = C;
-  ring.style.strokeDashoffset = C * (1 - doneN/total);
-  document.getElementById('pct').textContent = Math.round(doneN/total*100) + '%';
-  document.getElementById('doneCount').textContent = doneN + ' / ' + total;
+  const pct = total===0 ? 0 : Math.round(doneN/total*100);
+
+  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('progressLeft').textContent = `已完成 ${doneN} / ${total} 项`;
 
   const tagWrap = document.getElementById('tagWrap');
   if(doneN === total){
@@ -230,7 +221,7 @@ function render(){
       const isDone = done.has(item.id);
       return `
         <div class="item ${isDone?'done':''}" onclick="toggle('${item.id}')">
-          <div class="icon">${item.icon}</div>
+          <div class="num">${item.num}</div>
           <div class="body">
             <div class="txt">${item.text}</div>
             <div class="sub">${item.sub}</div>
