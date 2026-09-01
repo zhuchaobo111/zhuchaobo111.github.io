@@ -33,6 +33,7 @@
   .header .row { display:flex; align-items:center; justify-content:space-between; }
   .header h1 { font-size:21px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .header .date { font-size:13px; opacity:.92; margin-top:4px; }
+  .header .visit { font-size:13px; opacity:.75; margin-top:3px; }
   .badge { background:rgba(255,255,255,.22); padding:5px 14px; border-radius:18px; font-size:12.5px; font-weight:600; flex-shrink:0; }
 
   /* ===== 统计卡 ===== */
@@ -160,6 +161,7 @@
     <span class="badge" id="dateBadge">今天</span>
   </div>
   <div class="date" id="dateLine">每日例行检查</div>
+  <div class="visit" id="visitCount">👀 访问 <span id="busuanzi_value_site_pv">0</span> 次 · 今日 <span id="busuanzi_value_site_uv">0</span> 人</div>
 
   <!-- 统计卡 -->
   <div class="stats-row">
@@ -260,6 +262,15 @@ function todayStr(){
 }
 document.getElementById('dateBadge').textContent = todayStr();
 document.getElementById('dateLine').textContent = '📍 每日例行检查 · ' + todayStr();
+
+// ===== 访问计数器（不蒜子：服务器端累计，跨设备共享） =====
+// 引入不蒜子脚本，自动填充 busuanzi_value_site_pv / uv
+(function(){
+  const s = document.createElement('script');
+  s.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
+  s.async = true;
+  document.body.appendChild(s);
+})();
 
 function render(){
   const content = document.getElementById('content');
