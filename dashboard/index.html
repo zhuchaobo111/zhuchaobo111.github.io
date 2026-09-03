@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>浦南幼儿园 · 园所数据看板</title>
+<style>
+  :root {
+    --primary: #ff8c42;
+    --primary-dark: #f06f1f;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #2b2d42;
+    --muted: #9aa0b4;
+    --blue: #4a90e2;
+    --purple: #9b59b6;
+    --teal: #1abc9c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+    padding-bottom: 40px;
+  }
+
+  /* Header */
+  .header {
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:#fff; padding:20px 24px 16px;
+    box-shadow:0 4px 16px rgba(255,107,53,.2);
+  }
+  .header .top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .header h1 { font-size:22px; font-weight:800; }
+  .header .meta { font-size:13px; opacity:.85; margin-top:4px; }
+
+  /* Alert Banner */
+  .alert-banner {
+    margin:16px 20px 0; padding:14px 18px; border-radius:14px;
+    display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600;
+  }
+  .alert-banner.green { background:#e8f9ef; color:#1fa35b; }
+  .alert-banner.yellow { background:#fff8e6; color:#c77b10; }
+  .alert-banner.red { background:#fdecea; color:#d63031; }
+  .alert-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+  .alert-dot.green { background:var(--success); }
+  .alert-dot.yellow { background:var(--warning); }
+  .alert-dot.red { background:var(--danger); animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* Stats Row */
+  .stats-row {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+    padding:16px 20px;
+  }
+  .stat-card {
+    background:var(--card); border-radius:16px; padding:16px;
+    box-shadow:0 2px 10px rgba(43,45,66,.04);
+    display:flex; align-items:center; gap:14px;
+  }
+  .stat-card .icon {
+    width:50px; height:50px; border-radius:14px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:24px;
+  }
+  .stat-card .icon.o { background:#fff2e8; }
+  .stat-card .icon.b { background:#e8f0fe; }
+  .stat-card .icon.g { background:#e8f9ef; }
+  .stat-card .icon.p { background:#f3e8fd; }
+  .stat-card .num { font-size:26px; font-weight:800; line-height:1.2; }
+  .stat-card .label { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* Campus Cards */
+  .section-title {
+    font-size:15px; font-weight:700; color:var(--muted);
+    padding:0 20px; margin:8px 0 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title::before { content:''; width:4px; height:16px; background:var(--primary); border-radius:3px; }
+  .campus-row {
+    display:grid; grid-template-columns:repeat(5,1fr); gap:12px;
+    padding:0 20px;
+  }
+  .campus-card {
+    background:var(--card); border-radius:16px; padding:14px;
+    box-shadow:0 2px 10px rgba(43,45,66,.04);
+    border:2px solid transparent; transition:all .2s;
+  }
+  .campus-card:hover { border-color:var(--primary); transform:translateY(-2px); }
+  .campus-card .c-name { font-size:15px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+  .campus-card .c-status { width:10px; height:10px; border-radius:50%; background:var(--success); flex-shrink:0; }
+  .campus-card .c-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0f2f7; font-size:13px; }
+  .campus-card .c-row:last-child { border-bottom:none; }
+  .campus-card .c-row .k { color:var(--muted); }
+  .campus-card .c-row .v { font-weight:600; }
+
+  /* Charts Area */
+  .charts-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:16px;
+    padding:0 20px; margin-top:12px;
+  }
+  .chart-card {
+    background:var(--card); border-radius:16px; padding:18px;
+    box-shadow:0 2px 10px rgba(43,45,66,.04);
+  }
+  .chart-card .ch-title { font-size:14px; font-weight:700; margin-bottom:14px; color:var(--text); }
+  .bar-group { display:flex; align-items:flex-end; gap:12px; height:140px; padding:0 4px; }
+  .bar-item { flex:1; display:flex; flex-direction:column; align-items:center; }
+  .bar-val { font-size:12px; font-weight:700; margin-bottom:4px; color:var(--muted); }
+  .bar { width:100%; max-width:50px; border-radius:8px 8px 0 0; transition:height .3s; }
+  .bar-label { font-size:11px; color:var(--muted); margin-top:6px; text-align:center; }
+  .bar.c1 { background:linear-gradient(180deg,#ff8c42,#f06f1f); }
+  .bar.c2 { background:linear-gradient(180deg,#4a90e2,#357abd); }
+  .bar.c3 { background:linear-gradient(180deg,#9b59b6,#7d3c98); }
+  .bar.c4 { background:linear-gradient(180deg,#1abc9c,#16a085); }
+  .bar.c5 { background:linear-gradient(180deg,#f39c12,#e67e22); }
+
+  /* Pie SIM */
+  .pie-sim { display:flex; gap:20px; flex-wrap:wrap; }
+  .pie-group { flex:1; min-width:140px; }
+  .pie-group .p-title { font-size:12px; font-weight:600; color:var(--muted); margin-bottom:8px; }
+  .pie-bar { height:20px; border-radius:10px; margin-bottom:4px; display:flex; overflow:hidden; }
+  .pie-legend { display:flex; flex-wrap:wrap; gap:8px; font-size:11px; }
+  .pie-legend span { display:flex; align-items:center; gap:4px; }
+  .pie-legend .dot { width:8px; height:8px; border-radius:2px; }
+
+  /* Bottom charts */
+  .full-chart {
+    background:var(--card); border-radius:16px; padding:18px;
+    box-shadow:0 2px 10px rgba(43,45,66,.04);
+    margin:12px 20px 0;
+  }
+  .full-chart .ch-title { font-size:14px; font-weight:700; margin-bottom:14px; }
+
+  .table-mini { width:100%; border-collapse:collapse; font-size:12px; }
+  .table-mini th { background:#f4f6fb; padding:8px; text-align:center; font-weight:600; color:var(--muted); border-radius:6px; }
+  .table-mini td { padding:8px; text-align:center; border-bottom:1px solid #f0f2f7; }
+  .table-mini tr:hover td { background:#fafbfd; }
+
+  .footer { text-align:center; padding:20px; color:var(--muted); font-size:12px; }
+  .footer a { color:var(--primary); text-decoration:none; }
+
+  @media (max-width:900px) {
+    .stats-row { grid-template-columns:repeat(2,1fr); }
+    .campus-row { grid-template-columns:repeat(2,1fr); }
+    .charts-row { grid-template-columns:1fr; }
+  }
+  @media (max-width:500px) {
+    .stats-row { grid-template-columns:1fr; }
+    .campus-row { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="top">
+    <h1>📊 浦南幼儿园 · 园所数据看板</h1>
+    <span style="font-size:13px;opacity:.85;" id="dateBadge"></span>
+  </div>
+  <div class="meta">五校区综合管理驾驶舱 · 数据更新：<span id="updateTime"></span></div>
+</div>
+
+<!-- 预警横幅 -->
+<div class="alert-banner green" id="alertBanner">
+  <div class="alert-dot green"></div>
+  <span id="alertText">今日全园正常，无异常事件</span>
+</div>
+
+<!-- 核心指标 -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="icon o">👶</div>
+    <div><div class="num">1,017</div><div class="label">在园幼儿总数</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="icon b">👩‍🏫</div>
+    <div><div class="num">205</div><div class="label">教职工总数 · 师生比 1:4.96</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="icon g">🏫</div>
+    <div><div class="num">5 校区 · 44 班</div><div class="label">潍坊 / 陆家嘴 / 东城 / 锦和 / 云莲</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="icon p">📐</div>
+    <div><div class="num">37,994 ㎡</div><div class="label">五校区总占地面积</div></div>
+  </div>
+</div>
+
+<!-- 五校区概览 -->
+<div class="section-title">🏫 五校区概览</div>
+<div class="campus-row" id="campusCards"></div>
+
+<!-- 图表区 -->
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="ch-title">📊 各校区幼儿数与班级数</div>
+    <div class="bar-group" id="campusBar"></div>
+  </div>
+  <div class="chart-card">
+    <div class="ch-title">👩‍🏫 专任教师画像（103 人）</div>
+    <div class="pie-sim" id="teacherPie"></div>
+  </div>
+</div>
+
+<!-- 班级分布 -->
+<div class="full-chart">
+  <div class="ch-title">📋 班级与幼儿分布（年级 × 校区）</div>
+  <div id="classTable"></div>
+</div>
+
+<!-- 硬件设施 -->
+<div class="full-chart">
+  <div class="ch-title">🏗️ 硬件设施概览</div>
+  <div id="hardwareTable"></div>
+</div>
+
+<!-- 校区面积对比 -->
+<div class="charts-row" style="margin-top:12px;">
+  <div class="chart-card">
+    <div class="ch-title">📐 各校区面积对比（㎡）</div>
+    <div class="bar-group" id="areaBar"></div>
+  </div>
+  <div class="chart-card">
+    <div class="ch-title">📹 监控摄像分布</div>
+    <div class="bar-group" id="camBar"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>浦南幼儿园 · 信息部</span> &nbsp;|&nbsp;
+  <a href="https://zhuchaobo111.github.io/">一表看懂校园餐</a>
+</div>
+
+<script>
+// ===== 数据 =====
+const data = {
+  campuses: [
+    { name:'潍坊校区', kids:113, classes:5, area:4174, build:3867, year:1980, monitor:52, color:'c1' },
+    { name:'陆家嘴校区', kids:145, classes:7, area:4496, build:3588, year:2004, monitor:20, color:'c2' },
+    { name:'东城校区', kids:202, classes:9, area:8368, build:4186, year:2008, monitor:22, color:'c3' },
+    { name:'锦和校区', kids:202, classes:9, area:8294, build:4605, year:2003, monitor:48, color:'c4' },
+    { name:'云莲校区', kids:351, classes:14, area:12662, build:8098, year:2009, monitor:23, color:'c5' },
+  ],
+  teacher: {
+    gender: [{label:'女', val:93, pct:90.3, c:'#e74c3c'},{label:'男', val:10, pct:9.7, c:'#4a90e2'}],
+    age: [{label:'35岁以下', val:63, pct:61.2, c:'#4a90e2'},{label:'35岁及以上', val:40, pct:38.8, c:'#9b59b6'}],
+    edu: [{label:'研究生', val:13, pct:12.6, c:'#1abc9c'},{label:'本科', val:87, pct:84.5, c:'#ff8c42'},{label:'大专', val:2, pct:1.9, c:'#95a5a6'}],
+    title: [{label:'正高', val:2, c:'#e74c3c'},{label:'副高', val:14, c:'#f39c12'},{label:'中级', val:52, c:'#4a90e2'},{label:'初级', val:35, c:'#1abc9c'}],
+    backbone: [{label:'特级', val:2, c:'#e74c3c'},{label:'学科带头人', val:7, c:'#f39c12'},{label:'区骨干', val:18, c:'#4a90e2'},{label:'青年新秀', val:8, c:'#1abc9c'},{label:'园骨干', val:15, c:'#9b59b6'}],
+  },
+  classDist: [
+    {campus:'潍坊', 托班:2, 小班:1, 中班:1, 大班:1, 合计:5, 幼儿:113},
+    {campus:'陆家嘴', 托班:2, 小班:2, 中班:2, 大班:1, 合计:7, 幼儿:145},
+    {campus:'东城', 托班:2, 小班:2, 中班:2, 大班:3, 合计:9, 幼儿:202},
+    {campus:'锦和', 托班:2, 小班:3, 中班:2, 大班:2, 合计:9, 幼儿:202},
+    {campus:'云莲', 托班:3, 小班:4, 中班:4, 大班:3, 合计:14, 幼儿:351},
+  ],
+  hardware: [
+    {item:'校门出入监控', count:29},
+    {item:'明橱亮灶', count:72},
+    {item:'楼道监控', count:54},
+    {item:'操场监控', count:10},
+    {item:'合计', count:165},
+  ],
+  building: [
+    {item:'活动室', area:6111},
+    {item:'睡眠室', area:3195},
+    {item:'综合活动室', area:5321},
+    {item:'卫生间', area:1775},
+    {item:'保健观察室', area:305},
+  ],
+};
+
+// ===== 日期 =====
+function todayStr(){
+  const d = new Date();
+  const week = ['日','一','二','三','四','五','六'][d.getDay()];
+  return `${d.getMonth()+1}月${d.getDate()}日 周${week}`;
+}
+document.getElementById('dateBadge').textContent = todayStr();
+document.getElementById('updateTime').textContent = todayStr() + ' ' + new Date().toTimeString().slice(0,5);
+
+// ===== 校区卡片 =====
+function renderCampusCards(){
+  const container = document.getElementById('campusCards');
+  container.innerHTML = data.campuses.map(c => `
+    <div class="campus-card">
+      <div class="c-name"><span class="c-status"></span>${c.name}</div>
+      <div class="c-row"><span class="k">👶 在园幼儿</span><span class="v">${c.kids} 人</span></div>
+      <div class="c-row"><span class="k">🏫 班级数</span><span class="v">${c.classes} 个</span></div>
+      <div class="c-row"><span class="k">📐 占地面积</span><span class="v">${c.area.toLocaleString()} ㎡</span></div>
+      <div class="c-row"><span class="k">🏗️ 建成年份</span><span class="v">${c.year} 年</span></div>
+      <div class="c-row"><span class="k">📹 监控</span><span class="v">${c.monitor} 个</span></div>
+    </div>
+  `).join('');
+}
+
+// ===== 校区柱状图（幼儿数） =====
+function renderCampusBar(){
+  const container = document.getElementById('campusBar');
+  const max = Math.max(...data.campuses.map(c=>c.kids));
+  container.innerHTML = data.campuses.map(c => `
+    <div class="bar-item">
+      <div class="bar-val">${c.kids}人</div>
+      <div class="bar ${c.color}" style="height:${c.kids/max*120}px"></div>
+      <div class="bar-label">${c.name.replace('校区','')}</div>
+    </div>
+  `).join('');
+}
+
+// ===== 教师画像 =====
+function renderTeacherPie(){
+  const container = document.getElementById('teacherPie');
+  const groups = [
+    {title:'性别结构', data:data.teacher.gender, total:103},
+    {title:'学历结构', data:data.teacher.edu, total:103},
+    {title:'职称结构', data:data.teacher.title, total:103},
+    {title:'骨干梯队', data:data.teacher.backbone, total:50},
+  ];
+  container.innerHTML = groups.map(g => {
+    const bars = g.data.map(d => {
+      const w = Math.round(d.val/g.total*100);
+      return `<div style="flex:${w};background:${d.c};min-width:${w>10?w:10}px" title="${d.label}: ${d.val}人 (${w}%)"></div>`;
+    }).join('');
+    const legends = g.data.map(d => `<span><span class="dot" style="background:${d.c}"></span>${d.label} ${d.val}人</span>`).join('');
+    return `<div class="pie-group"><div class="p-title">${g.title}</div><div class="pie-bar">${bars}</div><div class="pie-legend">${legends}</div></div>`;
+  }).join('');
+}
+
+// ===== 班级分布表 =====
+function renderClassTable(){
+  const container = document.getElementById('classTable');
+  const grades = ['托班','小班','中班','大班','合计','幼儿'];
+  const rows = data.classDist.map(d => {
+    return `<tr>
+      <td style="font-weight:600;text-align:left;">${d.campus}</td>
+      ${grades.map(g => `<td>${d[g]||''}</td>`).join('')}
+    </tr>`;
+  }).join('');
+  // 合计行
+  const totals = {托班:11, 小班:12, 中班:11, 大班:10, 合计:44, 幼儿:1013};
+  const totalRow = `<tr style="font-weight:700;background:#fff8f0;">
+    <td style="text-align:left;">全园合计</td>
+    ${grades.map(g => `<td>${totals[g]||''}</td>`).join('')}
+  </tr>`;
+  container.innerHTML = `<table class="table-mini">
+    <thead><tr><th>校区</th>${grades.map(g => `<th>${g}</th>`).join('')}</tr></thead>
+    <tbody>${rows}${totalRow}</tbody>
+  </table>`;
+}
+
+// ===== 硬件设施 =====
+function renderHardware(){
+  const container = document.getElementById('hardwareTable');
+  container.innerHTML = `<table class="table-mini">
+    <thead><tr><th>指标</th>${data.campuses.map(c => `<th>${c.name.replace('校区','')}</th>`).join('')}<th>全园合计</th></tr></thead>
+    <tbody>
+      ${[
+        ['占地面积(㎡)', ...data.campuses.map(c=>c.area), 37994],
+        ['建筑面积(㎡)', ...data.campuses.map(c=>c.build), 24343],
+        ['运动场地(㎡)', 630, 840, 1344, 1870, 2340, 7024],
+        ['绿地面积(㎡)', 307, 1520, 3385, 1800, 4624, 11636],
+        ['监控数', ...data.campuses.map(c=>c.monitor), 165],
+        ['建成年份', ...data.campuses.map(c=>c.year), '—'],
+      ].map(row => `<tr><td style="font-weight:600;text-align:left;">${row[0]}</td>${row.slice(1).map(v => `<td>${typeof v==='number'?v.toLocaleString():v}</td>`).join('')}</tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ===== 面积柱状图 =====
+function renderAreaBar(){
+  const container = document.getElementById('areaBar');
+  const max = Math.max(...data.campuses.map(c=>c.area));
+  container.innerHTML = data.campuses.map(c => `
+    <div class="bar-item">
+      <div class="bar-val">${(c.area/1000).toFixed(1)}k</div>
+      <div class="bar ${c.color}" style="height:${c.area/max*120}px"></div>
+      <div class="bar-label">${c.name.replace('校区','')}</div>
+    </div>
+  `).join('');
+}
+
+// ===== 监控柱状图 =====
+function renderCamBar(){
+  const container = document.getElementById('camBar');
+  const max = Math.max(...data.campuses.map(c=>c.monitor));
+  container.innerHTML = data.campuses.map(c => `
+    <div class="bar-item">
+      <div class="bar-val">${c.monitor}个</div>
+      <div class="bar ${c.color}" style="height:${c.monitor/max*120}px"></div>
+      <div class="bar-label">${c.name.replace('校区','')}</div>
+    </div>
+  `).join('');
+}
+
+// ===== 初始化 =====
+renderCampusCards();
+renderCampusBar();
+renderTeacherPie();
+renderClassTable();
+renderHardware();
+renderAreaBar();
+renderCamBar();
+</script>
+</body>
+</html>
