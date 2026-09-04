@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>浦南幼儿园 · 数字驾驶舱</title>
+<style>
+:root {
+  --primary: #ff8c42; --primary-dark: #f06f1f; --success: #2ecc71;
+  --warning: #f39c12; --danger: #e74c3c; --bg: #f4f6fb; --card: #ffffff;
+  --text: #2b2d42; --muted: #9aa0b4; --blue: #4a90e2; --purple: #9b59b6;
+  --teal: #1abc9c; --radius: 14px; --shadow: 0 2px 10px rgba(43,45,66,.04);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);padding-bottom:80px}
+/* Header */
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:18px 20px 14px;box-shadow:0 4px 16px rgba(255,107,53,.2);position:sticky;top:0;z-index:100}
+.header .top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header h1{font-size:20px;font-weight:800}
+.header .meta{font-size:12px;opacity:.85;margin-top:4px}
+/* Alert Banner */
+.alert-banner{margin:12px 16px 0;padding:12px 16px;border-radius:var(--radius);display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
+.alert-banner.green{background:#e8f9ef;color:#1fa35b}
+.alert-banner.yellow{background:#fff8e6;color:#c77b10}
+.alert-banner.red{background:#fdecea;color:#d63031}
+.alert-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.alert-dot.green{background:var(--success)}.alert-dot.yellow{background:var(--warning)}.alert-dot.red{background:var(--danger);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* Stats Row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:12px 16px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.stat-card .icon{width:46px;height:46px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.stat-card .icon.o{background:#fff2e8}.stat-card .icon.b{background:#e8f0fe}.stat-card .icon.g{background:#e8f9ef}.stat-card .icon.p{background:#f3e8fd}
+.stat-card .num{font-size:24px;font-weight:800;line-height:1.2}
+.stat-card .label{font-size:11px;color:var(--muted);margin-top:2px}
+/* Section */
+.section-title{font-size:14px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px;margin:16px 16px 10px}
+.section-title::before{content:'';width:4px;height:16px;background:var(--primary);border-radius:3px}
+/* Campus Cards */
+.campus-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:0 16px}
+.campus-card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border:2px solid transparent;transition:all .2s;cursor:pointer}
+.campus-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.campus-card .c-name{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.campus-card .c-status{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0}
+.campus-card .c-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f2f7;font-size:12px}
+.campus-card .c-row:last-child{border:none}.campus-card .c-row .k{color:var(--muted)}.campus-card .c-row .v{font-weight:600}
+/* Charts */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+.chart-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.chart-card .ch-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text)}
+.bar-group{display:flex;align-items:flex-end;gap:10px;height:120px;padding:0 4px}
+.bar-item{flex:1;display:flex;flex-direction:column;align-items:center}
+.bar-val{font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)}
+.bar{width:100%;max-width:44px;border-radius:8px 8px 0 0;transition:height .3s}
+.bar-label{font-size:10px;color:var(--muted);margin-top:4px;text-align:center}
+.bar.c1{background:linear-gradient(180deg,#ff8c42,#f06f1f)}.bar.c2{background:linear-gradient(180deg,#4a90e2,#357abd)}.bar.c3{background:linear-gradient(180deg,#9b59b6,#7d3c98)}.bar.c4{background:linear-gradient(180deg,#1abc9c,#16a085)}.bar.c5{background:linear-gradient(180deg,#f39c12,#e67e22)}
+/* Pie */
+.pie-sim{display:flex;gap:16px;flex-wrap:wrap}
+.pie-group{flex:1;min-width:120px}
+.pie-group .p-title{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.pie-bar{height:18px;border-radius:9px;margin-bottom:3px;display:flex;overflow:hidden}
+.pie-legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px}
+.pie-legend span{display:flex;align-items:center;gap:3px}
+.pie-legend .dot{width:7px;height:7px;border-radius:2px}
+/* Full chart */
+.full-chart{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin:12px 16px 0}
+.full-chart .ch-title{font-size:13px;font-weight:700;margin-bottom:12px}
+/* Tables */
+.table-mini{width:100%;border-collapse:collapse;font-size:11px}
+.table-mini th{background:#f4f6fb;padding:7px 6px;text-align:center;font-weight:600;color:var(--muted);border-radius:6px}
+.table-mini td{padding:7px 6px;text-align:center;border-bottom:1px solid #f0f2f7}
+.table-mini tr:hover td{background:#fafbfd}
+/* Dynamic Status */
+.status-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:0 16px}
+.status-card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);text-align:center}
+.status-card .s-icon{font-size:28px;margin-bottom:6px}
+.status-card .s-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.status-card .s-val{font-size:20px;font-weight:800}
+.status-card .s-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.status-card.green .s-val{color:var(--success)}.status-card.yellow .s-val{color:var(--warning)}.status-card.red .s-val{color:var(--danger)}
+/* Patrol */
+.patrol-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 16px}
+.patrol-card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border-left:4px solid var(--success)}
+.patrol-card.pending{border-left-color:var(--muted)}
+.patrol-card.issue{border-left-color:var(--warning)}
+.patrol-card .p-time{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.patrol-card .p-status{font-size:14px;font-weight:700;margin-bottom:4px}
+.patrol-card .p-detail{font-size:11px;color:var(--muted)}
+/* Weekly */
+.week-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:0 16px}
+.week-card{background:var(--card);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow);min-height:100px;border:2px solid transparent}
+.week-card.today{border-color:var(--primary);background:#fff8f0}
+.week-card .w-date{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.week-card .w-day{font-size:16px;font-weight:800;margin-bottom:4px}
+.week-card .w-item{font-size:10px;padding:3px 6px;border-radius:8px;margin-bottom:3px;background:#f0f2f7;cursor:pointer}
+.week-card .w-item.meeting{background:#e8f0fe;color:#357abd}.week-card .w-item.event{background:#e8f9ef;color:#1fa35b}.week-card .w-item.inspect{background:#fdecea;color:#d63031}.week-card .w-item.training{background:#f3e8fd;color:#7d3c98}
+.edit-btn{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,53,.3);z-index:99;display:flex;align-items:center;justify-content:center}
+/* Modal */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal-box{background:var(--card);border-radius:var(--radius);padding:20px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto}
+.modal-box h3{font-size:16px;margin-bottom:12px}
+.modal-box textarea{width:100%;height:100px;border:1px solid #e0e0e0;border-radius:8px;padding:8px;font-size:13px;resize:vertical;font-family:inherit}
+.modal-box .btn-row{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
+.modal-box button{padding:8px 16px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer}
+.modal-box .btn-save{background:var(--primary);color:#fff}
+.modal-box .btn-cancel{background:#f0f2f7;color:var(--muted)}
+/* Tabs */
+.tab-row{display:flex;gap:8px;padding:0 16px;margin-top:12px;overflow-x:auto}
+.tab-btn{padding:6px 14px;border-radius:20px;border:1px solid #e0e0e0;background:#fff;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* Monthly Plan */
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 16px}
+.plan-card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border-top:3px solid var(--primary)}
+.plan-card .plan-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.plan-card .plan-item{font-size:11px;padding:4px 0;border-bottom:1px solid #f0f2f7}
+.plan-card .plan-item:last-child{border:none}
+.plan-card .plan-item .dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;background:var(--primary)}
+/* Footer */
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;margin-top:16px}
+.footer a{color:var(--primary);text-decoration:none}
+/* Editable */
+[contenteditable="true"]{outline:2px dashed transparent;transition:outline .2s}
+[contenteditable="true"]:hover{outline-color:var(--primary)}
+[contenteditable="true"]:focus{outline-color:var(--primary);background:#fffdf5}
+/* Responsive */
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}.campus-row,.status-row{grid-template-columns:repeat(2,1fr)}.charts-row,.patrol-row,.week-row,.plan-grid{grid-template-columns:1fr}}
+@media(max-width:500px){.stats-row,.campus-row,.status-row,.patrol-row,.week-row,.plan-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="top">
+    <h1>📊 浦南幼儿园 · 数字驾驶舱</h1>
+    <span style="font-size:12px;opacity:.85" id="dateBadge"></span>
+  </div>
+  <div class="meta">五校区综合管理驾驶舱 · 数据更新：<span id="updateTime"></span></div>
+</div>
+
+<!-- 预警横幅 -->
+<div class="alert-banner green" id="alertBanner">
+  <div class="alert-dot green"></div>
+  <span id="alertText">今日全园正常，无异常事件</span>
+</div>
+
+<!-- 传染病预警 -->
+<div style="margin:8px 16px;padding:10px 14px;background:#e8f9ef;border-radius:var(--radius);font-size:13px;font-weight:600;color:#1fa35b;display:flex;align-items:center;gap:8px" id="diseaseAlert">
+  <span>🟢</span><span>全园无传染病疫情</span>
+</div>
+
+<!-- 核心指标 -->
+<div class="stats-row">
+  <div class="stat-card"><div class="icon o">👶</div><div><div class="num">1,017</div><div class="label">在园幼儿总数</div></div></div>
+  <div class="stat-card"><div class="icon b">👩‍🏫</div><div><div class="num">205</div><div class="label">教职工总数 · 师生比 1:4.96</div></div></div>
+  <div class="stat-card"><div class="icon g">🏫</div><div><div class="num">5 校区 · 44 班</div><div class="label">潍坊 / 陆家嘴 / 东城 / 锦和 / 云莲</div></div></div>
+  <div class="stat-card"><div class="icon p">📐</div><div><div class="num">37,994 ㎡</div><div class="label">五校区总占地面积</div></div></div>
+</div>
+
+<!-- 五校区概览 -->
+<div class="section-title">🏫 五校区概览</div>
+<div class="campus-row" id="campusCards"></div>
+
+<!-- 动态数据状态灯 -->
+<div class="section-title">📊 今日动态数据</div>
+<div class="status-row">
+  <div class="status-card green" id="statusAttendance">
+    <div class="s-icon">👶</div><div class="s-title">幼儿出勤率</div>
+    <div class="s-val" contenteditable="true">95.2%</div><div class="s-sub">五校区今日出勤</div>
+  </div>
+  <div class="status-card green" id="statusTeacher">
+    <div class="s-icon">👩‍🏫</div><div class="s-title">教师到岗率</div>
+    <div class="s-val" contenteditable="true">100%</div><div class="s-sub">全园教师到岗</div>
+  </div>
+  <div class="status-card green" id="statusKitchen">
+    <div class="s-icon">🍳</div><div class="s-title">厨房检查</div>
+    <div class="s-val" contenteditable="true">合格</div><div class="s-sub">五校区检查完成</div>
+  </div>
+  <div class="status-card green" id="statusPatrol">
+    <div class="s-icon">🔍</div><div class="s-title">一日三巡</div>
+    <div class="s-val" contenteditable="true">已完成</div><div class="s-sub">早巡·中巡·下午巡</div>
+  </div>
+  <div class="status-card green" id="statusDisease">
+    <div class="s-icon">🏥</div><div class="s-title">传染病</div>
+    <div class="s-val" contenteditable="true">无</div><div class="s-sub">全园无疫情</div>
+  </div>
+</div>
+
+<!-- 一日三巡详情 -->
+<div class="section-title">🔍 一日三巡检查详情</div>
+<div class="patrol-row">
+  <div class="patrol-card" id="patrolM">
+    <div class="p-time">☀️ 早巡 8:00-9:00</div>
+    <div class="p-status" contenteditable="true">✅ 已完成</div>
+    <div class="p-detail" contenteditable="true">巡查人：- | 发现问题：0</div>
+  </div>
+  <div class="patrol-card" id="patrolN">
+    <div class="p-time">🌤️ 中巡 12:00-13:00</div>
+    <div class="p-status" contenteditable="true">✅ 已完成</div>
+    <div class="p-detail" contenteditable="true">巡查人：- | 发现问题：0</div>
+  </div>
+  <div class="patrol-card" id="patrolA">
+    <div class="p-time">🌅 下午巡 15:00-16:00</div>
+    <div class="p-status" contenteditable="true">⏳ 待巡查</div>
+    <div class="p-detail" contenteditable="true">巡查人：- | 发现问题：0</div>
+  </div>
+</div>
+
+<!-- 教师画像 -->
+<div class="section-title">👩‍🏫 专任教师画像（103 人）</div>
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="ch-title">性别 · 年龄 · 学历</div>
+    <div class="pie-sim" id="teacherPie1"></div>
+  </div>
+  <div class="chart-card">
+    <div class="ch-title">职称 · 骨干梯队</div>
+    <div class="pie-sim" id="teacherPie2"></div>
+  </div>
+</div>
+
+<!-- 班级分布 -->
+<div class="full-chart">
+  <div class="ch-title">📋 班级与幼儿分布</div>
+  <div id="classTable"></div>
+</div>
+
+<!-- 面积对比 -->
+<div class="section-title">📐 各校区面积对比</div>
+<div class="full-chart"><div class="ch-title">占地面积（㎡）</div><div class="bar-group" id="areaBar"></div></div>
+
+<!-- 建成年份 -->
+<div class="full-chart">
+  <div class="ch-title">🏗️ 建成年份时间轴</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;position:relative">
+    <div style="position:absolute;top:50%;left:0;right:0;height:3px;background:var(--primary);border-radius:2px;transform:translateY(-50%)"></div>
+    <div style="text-align:center;position:relative;z-index:1"><div style="width:16px;height:16px;background:var(--primary);border-radius:50%;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:700;color:var(--primary)">1980</div><div style="font-size:11px;color:var(--muted)">潍坊</div></div>
+    <div style="text-align:center;position:relative;z-index:1"><div style="width:16px;height:16px;background:var(--purple);border-radius:50%;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:700;color:var(--purple)">2003</div><div style="font-size:11px;color:var(--muted)">锦和</div></div>
+    <div style="text-align:center;position:relative;z-index:1"><div style="width:16px;height:16px;background:var(--blue);border-radius:50%;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:700;color:var(--blue)">2004</div><div style="font-size:11px;color:var(--muted)">陆家嘴</div></div>
+    <div style="text-align:center;position:relative;z-index:1"><div style="width:16px;height:16px;background:var(--teal);border-radius:50%;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:700;color:var(--teal)">2008</div><div style="font-size:11px;color:var(--muted)">东城</div></div>
+    <div style="text-align:center;position:relative;z-index:1"><div style="width:16px;height:16px;background:var(--warning);border-radius:50%;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:700;color:var(--warning)">2009</div><div style="font-size:11px;color:var(--muted)">云莲</div></div>
+  </div>
+</div>
+
+<!-- 本周工作安排 -->
+<div class="section-title">📅 本周工作安排（逐日）</div>
+<div class="week-row" id="weekRow"></div>
+
+<!-- 每月工作计划 -->
+<div class="section-title">📄 每月工作计划（条线重点）</div>
+<div class="plan-grid" id="planGrid"></div>
+
+<!-- 硬件设施 -->
+<div class="full-chart">
+  <div class="ch-title">🏗️ 硬件设施概览</div>
+  <div id="hardwareTable"></div>
+</div>
+
+<div class="footer">
+  <span>浦南幼儿园 · 信息部</span> &nbsp;|&nbsp;
+  <a href="https://zhuchaobo111.github.io/">一表看懂校园餐</a> &nbsp;|&nbsp;
+  <a href="https://zhuchaobo111.github.io/dashboard/">基础看板</a>
+</div>
+
+<button class="edit-btn" onclick="toggleEdit()" title="编辑模式">✏️</button>
+
+<script>
+// ===== Data =====
+const data = {
+  campuses: [
+    { name:'潍坊校区', kids:113, classes:5, area:4174, build:3867, year:1980, color:'c1' },
+    { name:'陆家嘴校区', kids:145, classes:7, area:4496, build:3588, year:2004, color:'c2' },
+    { name:'东城校区', kids:202, classes:9, area:8368, build:4186, year:2008, color:'c3' },
+    { name:'锦和校区', kids:202, classes:9, area:8294, build:4605, year:2003, color:'c4' },
+    { name:'云莲校区', kids:351, classes:14, area:12662, build:8098, year:2009, color:'c5' },
+  ],
+  teacher: {
+    gender: [{label:'女',val:93,pct:90.3,c:'#e74c3c'},{label:'男',val:10,pct:9.7,c:'#4a90e2'}],
+    age: [{label:'35岁以下',val:63,pct:61.2,c:'#4a90e2'},{label:'35岁及以上',val:40,pct:38.8,c:'#9b59b6'}],
+    edu: [{label:'研究生',val:13,pct:12.6,c:'#1abc9c'},{label:'本科',val:87,pct:84.5,c:'#ff8c42'},{label:'大专',val:2,pct:1.9,c:'#95a5a6'}],
+    title: [{label:'正高',val:2,c:'#e74c3c'},{label:'副高',val:14,c:'#f39c12'},{label:'中级',val:52,c:'#4a90e2'},{label:'初级',val:35,c:'#1abc9c'}],
+    backbone: [{label:'特级',val:2,c:'#e74c3c'},{label:'学科带头人',val:7,c:'#f39c12'},{label:'区骨干',val:18,c:'#4a90e2'},{label:'青年新秀',val:8,c:'#1abc9c'},{label:'园骨干',val:15,c:'#9b59b6'}],
+  },
+  classDist: [
+    {campus:'潍坊',托班:2,小班:1,中班:1,大班:1,合计:5,幼儿:113},
+    {campus:'陆家嘴',托班:2,小班:2,中班:2,大班:1,合计:7,幼儿:145},
+    {campus:'东城',托班:2,小班:2,中班:2,大班:3,合计:9,幼儿:202},
+    {campus:'锦和',托班:2,小班:3,中班:2,大班:2,合计:9,幼儿:202},
+    {campus:'云莲',托班:3,小班:4,中班:4,大班:3,合计:14,幼儿:351},
+  ],
+  hardware: [
+    {item:'校门出入监控',潍坊:5,陆家嘴:6,东城:6,云莲:8,锦和:4,合计:29},
+    {item:'明橱亮灶',潍坊:13,陆家嘴:14,东城:16,云莲:15,锦和:14,合计:72},
+    {item:'楼道监控',潍坊:34,陆家嘴:0,东城:0,云莲:0,锦和:20,合计:54},
+    {item:'操场监控',潍坊:0,陆家嘴:0,东城:0,云莲:0,锦和:10,合计:10},
+    {item:'合计',潍坊:52,陆家嘴:20,东城:22,云莲:23,锦和:48,合计:165},
+  ],
+  areaData: [
+    {item:'占地面积',潍坊:4174,陆家嘴:4496,东城:8368,锦和:8294,云莲:12662,合计:37994},
+    {item:'建筑面积',潍坊:3867,陆家嘴:3588,东城:4186,锦和:4605,云莲:8098,合计:24343},
+    {item:'运动场地',潍坊:630,陆家嘴:840,东城:1344,锦和:1870,云莲:2340,合计:7024},
+    {item:'绿地面积',潍坊:307,陆家嘴:1520,东城:3385,锦和:1800,云莲:4624,合计:11636},
+  ],
+  week: [
+    {day:'周一',items:[{text:'行政例会',type:'meeting'},{text:'各班晨检',type:'event'}]},
+    {day:'周二',items:[{text:'教研活动',type:'training'},{text:'厨房检查',type:'inspect'}]},
+    {day:'周三',items:[{text:'家长开放日准备',type:'event'}]},
+    {day:'周四',items:[{text:'安全巡查',type:'inspect'},{text:'教师培训',type:'training'}]},
+    {day:'周五',items:[{text:'一周小结',type:'meeting'},{text:'下周计划',type:'event'}]},
+  ],
+  monthlyPlan: [
+    {dept:'保教工作',items:['完成学期教学计划审核','开展主题教研活动','组织家长开放日','推进幼儿发展评估'],color:'#4a90e2'},
+    {dept:'后勤保障',items:['五校区厨房专项检查','设备维修汇总','消防设施月检','冬季供暖设备检查'],color:'#ff8c42'},
+    {dept:'安全管理',items:['安全隐患排查','食品安全培训','传染病防控','应急演练'],color:'#e74c3c'},
+    {dept:'信息工作',items:['数据驾驶舱试运行','教师信息化培训','公众号内容更新','孩子通平台维护'],color:'#9b59b6'},
+    {dept:'家园共育',items:['家委会会议','家长满意度调查','社区共建活动','家园联系册检查'],color:'#1abc9c'},
+    {dept:'队伍建设',items:['骨干教师培养计划','新教师带教指导','师德师风专题学习','教师职称评审准备'],color:'#f39c12'},
+  ]
+};
+
+// ===== Date =====
+function todayStr(){
+  const d = new Date(); const week = ['日','一','二','三','四','五','六'][d.getDay()];
+  return `${d.getMonth()+1}月${d.getDate()}日 周${week}`;
+}
+document.getElementById('dateBadge').textContent = todayStr();
+document.getElementById('updateTime').textContent = todayStr() + ' ' + new Date().toTimeString().slice(0,5);
+
+// ===== Campus Cards =====
+function renderCampus(){
+  document.getElementById('campusCards').innerHTML = data.campuses.map(c => `
+    <div class="campus-card" onclick="editCampusCard('${c.name}')">
+      <div class="c-name"><span class="c-status"></span>${c.name}</div>
+      <div class="c-row"><span class="k">👶 幼儿</span><span class="v">${c.kids} 人</span></div>
+      <div class="c-row"><span class="k">🏫 班级</span><span class="v">${c.classes} 个</span></div>
+      <div class="c-row"><span class="k">📐 占地</span><span class="v">${c.area.toLocaleString()} ㎡</span></div>
+      <div class="c-row"><span class="k">🏗️ 建成年份</span><span class="v">${c.year} 年</span></div>
+    </div>
+  `).join('');
+}
+
+// ===== Teacher Pie =====
+function renderTeacherPie(){
+  const g1 = [{title:'性别结构',data:data.teacher.gender,total:103},{title:'年龄结构',data:data.teacher.age,total:103},{title:'学历结构',data:data.teacher.edu,total:103}];
+  const g2 = [{title:'职称结构',data:data.teacher.title,total:103},{title:'骨干梯队',data:data.teacher.backbone,total:50}];
+  document.getElementById('teacherPie1').innerHTML = g1.map(g => renderPieGroup(g)).join('');
+  document.getElementById('teacherPie2').innerHTML = g2.map(g => renderPieGroup(g)).join('');
+}
+function renderPieGroup(g){
+  const bars = g.data.map(d => {
+    const w = Math.round(d.val/g.total*100);
+    return `<div style="flex:${w};background:${d.c};min-width:${w>10?w:10}px" title="${d.label}: ${d.val}人 (${w}%)"></div>`;
+  }).join('');
+  const legends = g.data.map(d => `<span><span class="dot" style="background:${d.c}"></span>${d.label} ${d.val}人</span>`).join('');
+  return `<div class="pie-group"><div class="p-title">${g.title}</div><div class="pie-bar">${bars}</div><div class="pie-legend">${legends}</div></div>`;
+}
+
+// ===== Class Table =====
+function renderClassTable(){
+  const grades = ['托班','小班','中班','大班','合计','幼儿'];
+  const rows = data.classDist.map(d => `<tr><td style="font-weight:600;text-align:left">${d.campus}</td>${grades.map(g => `<td>${d[g]||''}</td>`).join('')}</tr>`).join('');
+  const totalRow = `<tr style="font-weight:700;background:#fff8f0"><td style="text-align:left">全园合计</td>${grades.map(g => `<td>${g==='幼儿'?1013:g==='合计'?44:data.classDist.reduce((s,d)=>s+(d[g]||0),0)}</td>`).join('')}</tr>`;
+  document.getElementById('classTable').innerHTML = `<table class="table-mini"><thead><tr><th>校区</th>${grades.map(g => `<th>${g}</th>`).join('')}</tr></thead><tbody>${rows}${totalRow}</tbody></table>`;
+}
+
+// ===== Area Bar =====
+function renderAreaBar(){
+  const max = Math.max(...data.campuses.map(c=>c.area));
+  document.getElementById('areaBar').innerHTML = data.campuses.map(c => `
+    <div class="bar-item"><div class="bar-val">${(c.area/1000).toFixed(1)}k</div><div class="bar ${c.color}" style="height:${c.area/max*110}px"></div><div class="bar-label">${c.name.replace('校区','')}</div></div>
+  `).join('');
+}
+
+// ===== Hardware =====
+function renderHardware(){
+  const camps = ['潍坊','陆家嘴','东城','锦和','云莲','合计'];
+  const rows = data.areaData.map(r => `<tr><td style="font-weight:600;text-align:left">${r.item}(㎡)</td>${camps.map(c => `<td>${r[c]?r[c].toLocaleString():'-'}</td>`).join('')}</tr>`).join('');
+  document.getElementById('hardwareTable').innerHTML = `<table class="table-mini"><thead><tr><th>指标</th>${camps.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ===== Week =====
+function renderWeek(){
+  const today = new Date().getDay();
+  document.getElementById('weekRow').innerHTML = data.week.map((d,i) => {
+    const isToday = (i+1) === today;
+    const items = d.items.map(it => `<div class="w-item ${it.type}" contenteditable="true">${it.text}</div>`).join('');
+    return `<div class="week-card ${isToday?'today':''}">
+      <div class="w-date">${todayStr().split(' ')[0].replace(/月|日/g,'/')}${d.day}</div>
+      <div class="w-day">${d.day}</div>${items}
+    </div>`;
+  }).join('');
+}
+
+// ===== Monthly Plan =====
+function renderPlan(){
+  document.getElementById('planGrid').innerHTML = data.monthlyPlan.map(d => `
+    <div class="plan-card" style="border-top-color:${d.color}">
+      <div class="plan-title" contenteditable="true" style="color:${d.color}">${d.dept}</div>
+      ${d.items.map(it => `<div class="plan-item"><span class="dot" style="background:${d.color}"></span><span contenteditable="true">${it}</span></div>`).join('')}
+    </div>
+  `).join('');
+}
+
+// ===== Edit Mode =====
+let editMode = false;
+function toggleEdit(){
+  editMode = !editMode;
+  const els = document.querySelectorAll('[contenteditable]');
+  els.forEach(el => el.contentEditable = editMode);
+  const btn = document.querySelector('.edit-btn');
+  btn.textContent = editMode ? '💾' : '✏️';
+  btn.style.background = editMode ? 'var(--success)' : 'var(--primary)';
+  if(!editMode) saveData();
+}
+
+// ===== Save/Load =====
+function saveData(){
+  const state = {};
+  document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+    if(el.id) state[el.id] = el.textContent;
+  });
+  localStorage.setItem('dashboard_data', JSON.stringify(state));
+}
+function loadData(){
+  try {
+    const state = JSON.parse(localStorage.getItem('dashboard_data') || '{}');
+    Object.entries(state).forEach(([id,val]) => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = val;
+    });
+  } catch(e){}
+}
+
+// ===== Init =====
+renderCampus(); renderTeacherPie(); renderClassTable(); renderAreaBar(); renderHardware(); renderWeek(); renderPlan();
+loadData();
+</script>
+</body>
+</html>
